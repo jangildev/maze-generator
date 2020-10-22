@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stack>
 #include <vector>
-
+#include <fstream>
 
 enum class Direction
 {
@@ -39,7 +39,7 @@ int main()
     std::vector<std::vector<sf::Vector2f>> allPaths; //all possible paths
     allPaths.push_back({ sf::Vector2f(0,0) });
 
-    std::vector<sf::VertexArray> longestPath; //longest possible path without repetitions
+    sf::VertexArray longestPath = sf::VertexArray(sf::PrimitiveType::LinesStrip); //longest possible path without repetitions
     sf::RectangleShape start; //start of the maze
     sf::RectangleShape end; // end of maze
     int current_path = 0; 
@@ -207,15 +207,34 @@ int main()
                 end.setPosition(path[path.size() - 1]);
                 end.setFillColor(sf::Color::Red);
 
-                for (int i = 0; i < path.size() - 1; i++)
+                for (int i = 0; i < path.size(); i++)
                 {
-                    sf::VertexArray va = sf::VertexArray(sf::PrimitiveType::LineStrip, 2);
-                    va[0].color = sf::Color::Magenta;
-                    va[0].position = sf::Vector2f(path[i].x + CELL_WIDTH / 2, path[i].y + CELL_HEIGHT / 2);
-                    va[1].color = sf::Color::Magenta;
-                    va[1].position = sf::Vector2f(path[i + 1].x + CELL_WIDTH / 2, path[i + 1].y + CELL_HEIGHT / 2);
-                    longestPath.push_back(va);
+                    sf::Vertex point;
+                    point.color = sf::Color::Magenta;
+                    point.position = sf::Vector2f(path[i].x + CELL_WIDTH / 2, path[i].y + CELL_HEIGHT / 2);
+                    longestPath.append(point);
                 }
+
+                //Write maze to file
+
+                /*std::ofstream stream;
+                stream.open("maze.txt");
+                stream << "window\n";
+                stream << WIDTH << " " << HEIGHT << "\n";
+                stream << "cell\n";
+                stream << CELL_WIDTH << " " << CELL_HEIGHT << "\n";
+                stream << "walls\n";
+                for (auto w : walls)
+                {
+                    sf::FloatRect b = w.getGlobalBounds();
+                    stream << b.left << " " << b.top << " " << b.width << " " << b.height << "\n";
+                }
+                stream << "path\n";
+                for (auto p : path)
+                {
+                    stream << p.x << " " << p.y << "\n";
+                }
+                stream.close();*/
             }
         }
 
@@ -233,10 +252,7 @@ int main()
             window.draw(start);
             window.draw(end);
 
-            for (auto va : longestPath)
-            {
-                window.draw(va);
-            }
+            window.draw(longestPath);
         }
 
         for (auto w : walls)
